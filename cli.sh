@@ -61,7 +61,7 @@ case "$1" in
                 start_server_logs
                 ;;
             *)
-                echo "usage: cli.sh start (reader|writer)"
+                echo "usage: cli.sh start (reader|writer|server-log)"
                 popd > /dev/null
                 exit 1
         esac

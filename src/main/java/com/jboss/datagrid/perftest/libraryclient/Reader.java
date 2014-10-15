@@ -34,6 +34,7 @@ public class Reader {
             try {
                 Thread.sleep(waitTimeBetweenIterations);
             } catch (InterruptedException e) {}
+            /**
             long startTime = System.currentTimeMillis();
             for (long i = 0; i <= numberOfEntries; i++) {
                 if (cache.get(i) != null) {
@@ -41,6 +42,7 @@ public class Reader {
                 }
             }
             log.info("Reading " + count + " objects from the cache took " + (System.currentTimeMillis()-startTime) + " ms");
+            */
         }
     }
 
