@@ -3,7 +3,7 @@
 #Make sure we are in the root dir
 pushd $(dirname $0) > /dev/null
 
-JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
+JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dlog4j.configuration=log4j.xml"
 #JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g"
 READ_CLIENT_JAR=target/reader-jar-with-dependencies.jar
 WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar

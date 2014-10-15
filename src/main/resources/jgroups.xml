@@ -55,8 +55,6 @@
 
     <PING timeout="3000" num_initial_members="2"/>
     <MERGE2 max_interval="30000" min_interval="10000"/>
-    <FD_SOCK/>
-    <FD_ALL/>
     <BARRIER />
     <pbcast.NAKACK  exponential_backoff="0"
                     use_mcast_xmit="true"
