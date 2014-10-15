@@ -40,7 +40,7 @@ public class Writer {
         log.info("Starting the writer....");
         switch (args.length) {
             case 4 :
-                new Writer(ClusterMode.valueOf(args[0]),Long.parseLong(args[1]),Long.parseLong(args[2]),Integer.parseInt(args[2]));
+                new Writer(ClusterMode.valueOf(args[0]),Long.parseLong(args[1]),Long.parseLong(args[2]),Integer.parseInt(args[3]));
                 break;
             default:
                 System.out.println("Usage: Writer <cluster-mode> <wait time between iterations> <number of entries> <object size>");
