@@ -28,8 +28,8 @@
 		<!-- Configure a synchronous replication cache -->
 		<jmxStatistics enabled="false" />
 
-		<clustering mode="dist">
-			<async />
+		<clustering mode="repl">
+			<sync />
 		</clustering>
 	</default>
 	<namedCache name="mytestcache"></namedCache>
