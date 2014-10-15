@@ -8,11 +8,15 @@ JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g"
 READ_CLIENT_JAR=target/reader-jar-with-dependencies.jar
 WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar
 
+#DEFAULT VALUES
 WAIT_TIME=10000
 OBJECT_COUNT=100000
 OBJECT_SIZE=600
+READ_ENTRIES=false
 
 NUM_OF_READERS=1
+
+CLUSTER_MODE=DIST_SYNC
 
 mkdir -p pids
 
@@ -23,22 +27,43 @@ function start_server_logs {
 }
 
 function start_readers {
+    if [[ "$5" != "" ]]; then
+        READ_ENTRIES=$5
+    fi
+    if [[ "$4" != "" ]]; then
+        OBJECT_COUNT=$4
+    fi
+    if [[ "$3" != "" ]]; then
+        WAIT_TIME=$3
+    fi
+    if [[ "$2" != "" ]]; then
+        NUM_OF_READERS=$2
+    fi
     if [[ "$1" != "" ]]; then
-        NUM_OF_READERS=$1
+        CLUSTER_MODE=$1
     fi
     echo "Starting $NUM_OF_READERS readers"
     for i in $(seq 1 $NUM_OF_READERS)
     do
         echo "Starting reader $i"
         mkdir -p logs
-        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${WAIT_TIME} ${OBJECT_COUNT} > logs/reader-$i.log 2>&1 &
+        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES} > logs/reader-$i.log 2>&1 &
         echo "$!" > pids/reader-$i.pid
     done
 }
 
 function start_writer {
     echo "Starting writer"
-    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}  > logs/writer.log 2>&1 &
+    if [[ "$3" != "" ]]; then
+        OBJECT_COUNT=$3
+    fi
+    if [[ "$2" != "" ]]; then
+        WAIT_TIME=$2
+    fi
+    if [[ "$1" != "" ]]; then
+        CLUSTER_MODE=$1
+    fi
+    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}   > logs/writer.log 2>&1 &
     echo "$!" > pids/writer.pid
 }
 
@@ -50,12 +75,15 @@ case "$1" in
         ;;
 
     start)
-        case "$2" in
+        shift
+        case "$1" in
             reader)
-                start_readers $3
+                shift
+                start_readers $@
                 ;;
             writer)
-                start_writer
+                shift
+                start_writer $@
                 ;;
             server-log)
                 start_server_logs
@@ -67,12 +95,14 @@ case "$1" in
         esac
         ;;
     view)
-        case "$2" in
+        shift
+        case "$1" in
             server-log)
                 cat logs/server.log | more
                 ;;
             reader-log)
-                cat logs/reader-$3.log | more
+                shift
+                cat logs/reader-$1.log | more
                 ;;
             writer-log)
                 cat logs/writer.log | more
@@ -92,12 +122,13 @@ case "$1" in
         done
         ;;
     export)
-        if [[ "x$2" = "x" ]]; then
+        shift
+        if [[ "x$1" = "x" ]]; then
             echo "usage: cli.sh export <outputfile>"
             popd > /dev/null
             exit 1
         fi
-        cat logs/server.log | grep all | awk '{ print $1,$4,$12 }' > $2
+        cat logs/server.log | grep all | awk '{ print $1,$4,$12 }' > $1
         ;;
      *)
         echo "usage: cli.sh (build|start|view|stop-all|export)"

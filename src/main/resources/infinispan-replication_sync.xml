@@ -28,7 +28,7 @@
 		<!-- Configure a synchronous replication cache -->
 		<jmxStatistics enabled="false" />
 
-		<clustering mode="repl">
+		<clustering mode="repl" >
 			<sync />
 		</clustering>
 	</default>

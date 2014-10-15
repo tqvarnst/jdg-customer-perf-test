@@ -34,4 +34,38 @@ public class Constants {
      *
      */
     public static final int OBJECTSIZE = 600;
+
+
+    /**
+     * This flag indicated weather the reader should actually read the entries. Reading allot of entries will consume cpu cycles
+     */
+    public static final boolean DEFAULT_READ_ENTRIES=false;
+
+    /**
+     *
+     */
+    public static final ClusterMode DEFAULT_CLUSTER_MODE =ClusterMode.REPL_SYNC;
+
+
+    public enum ClusterMode {
+        DIST_SYNC, DIST_ASYNC, REPL_SYNC, REPL_ASYNC;
+
+        public String getConfig() {
+            switch (this) {
+                case DIST_ASYNC:
+                    return "infinispan-distribution_async.xml";
+                case DIST_SYNC:
+                    return "infinispan-distribution_sync.xml";
+                case REPL_ASYNC:
+                    return "infinispan-replication_async.xml";
+                case REPL_SYNC:
+                    return "infinispan-replication_sync.xml";
+                default:
+                    throw new RuntimeException("Unknown Cluster mode");
+            }
+        }
+
+    }
+
+
 }
