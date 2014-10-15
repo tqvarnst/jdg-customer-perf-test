@@ -93,7 +93,7 @@ case "$1" in
         ;;
 
      *)
-        echo "usage: cli.sh (build|start)"
+        echo "usage: cli.sh (build|start|view|stop-all)"
         popd > /dev/null
         exit 1
 esac
