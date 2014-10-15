@@ -83,7 +83,7 @@ case "$1" in
                 exit 1
         esac
         ;;
-     stop-all)
+    stop-all)
         for pidfile in $(ls pids/*.pid)
         do
             echo "Killing process width pid $(cat $pidfile)"
@@ -91,9 +91,16 @@ case "$1" in
             rm $pidfile
         done
         ;;
-
+    export)
+        if [[ "x$2" = "x" ]]; then
+            echo "usage: cli.sh export <outputfile>"
+            popd > /dev/null
+            exit 1
+        fi
+        cat logs/server.log | grep all | awk '{ print $1,$4,$12 }' > $2
+        ;;
      *)
-        echo "usage: cli.sh (build|start|view|stop-all)"
+        echo "usage: cli.sh (build|start|view|stop-all|export)"
         popd > /dev/null
         exit 1
 esac
