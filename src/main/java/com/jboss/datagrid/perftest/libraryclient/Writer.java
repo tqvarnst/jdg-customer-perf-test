@@ -36,7 +36,7 @@ public class Writer {
 
 
     public static void main(final String[] args) {
-        log.info("Starting the reader....");
+        log.info("Starting the writer....");
         switch (args.length) {
             case 4 :
                 new Writer(ClusterMode.valueOf(args[0]),Long.parseLong(args[1]),Long.parseLong(args[2]),Integer.parseInt(args[2]));

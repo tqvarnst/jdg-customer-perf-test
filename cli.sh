@@ -3,8 +3,8 @@
 #Make sure we are in the root dir
 pushd $(dirname $0) > /dev/null
 
-#JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -Djava.net.preferIPv4Stack=true -XX:+PrintGCTimeStamps -Xloggc:jdg-client-gc.log"
-JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g"
+JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
+#JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g"
 READ_CLIENT_JAR=target/reader-jar-with-dependencies.jar
 WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar
 
@@ -53,7 +53,9 @@ function start_readers {
 }
 
 function start_writer {
-    echo "Starting writer"
+    if [[ "$4" != "" ]]; then
+        OBJECT_SIZE=$4
+    fi
     if [[ "$3" != "" ]]; then
         OBJECT_COUNT=$3
     fi
@@ -63,6 +65,7 @@ function start_writer {
     if [[ "$1" != "" ]]; then
         CLUSTER_MODE=$1
     fi
+    echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE}"
     java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}   > logs/writer.log 2>&1 &
     echo "$!" > pids/writer.pid
 }
