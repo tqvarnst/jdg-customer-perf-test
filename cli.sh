@@ -47,7 +47,7 @@ function start_readers {
     do
         echo "Starting reader $i"
         mkdir -p logs
-        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES} | tee logs/reader-$i.log
+        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES} > logs/reader-$i.log 2>&1 &
         echo "$!" > pids/reader-$i.pid
     done
 }
