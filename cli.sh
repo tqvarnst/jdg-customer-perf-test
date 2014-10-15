@@ -47,7 +47,7 @@ function start_readers {
     do
         echo "Starting reader $i"
         mkdir -p logs
-        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES} > logs/reader-$i.log 2>&1 &
+        java ${JAVA_OPS} -DINSTANCE_NAME=byte-reader-${i} -jar ${READ_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES} | tee logs/reader-$i.log
         echo "$!" > pids/reader-$i.pid
     done
 }
@@ -66,7 +66,7 @@ function start_writer {
         CLUSTER_MODE=$1
     fi
     echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE}"
-    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}   > logs/writer.log 2>&1 &
+    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}  | tee logs/writer.log
     echo "$!" > pids/writer.pid
 }
 

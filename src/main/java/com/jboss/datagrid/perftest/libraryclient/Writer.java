@@ -1,5 +1,6 @@
 package com.jboss.datagrid.perftest.libraryclient;
 
+import org.infinispan.Cache;
 import org.infinispan.commons.api.AsyncCache;
 import org.infinispan.context.Flag;
 
@@ -15,7 +16,7 @@ public class Writer {
 
     static Logger log = Logger.getLogger(Writer.class.getName());
 
-    private AsyncCache<Object,Object> cache;
+    private Cache<Object,Object> cache;
 
     public Writer(ClusterMode clusterMode, long waitTimeBetweenIterations, long numberOfEntries, int objectSize) {
         cache = EmbeddedCacheContainer.getCacheManager(clusterMode).getCache(Constants.CACHE_NAME).getAdvancedCache().withFlags(Flag.SKIP_LOCKING,Flag.IGNORE_RETURN_VALUES);
@@ -28,7 +29,7 @@ public class Writer {
             final long start = System.currentTimeMillis();
             for (long i = 1; i <= numberOfEntries + 1; i++) {
                 final byte[] record = new byte[objectSize];
-                cache.putAsync(i, record);
+                cache.put(i, record);
             }
             log.info("Added " + numberOfEntries + " async to the cache in " + (System.currentTimeMillis()-start) + " ms");
         }
