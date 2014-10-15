@@ -119,5 +119,24 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>no-settings</id>
+            <repositories>
+                <repository>
+                    <id>JBoss repository</id>
+                    <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+                </repository>
+                <repository>
+                    <id>jboss-ga-repository</id>
+                    <url>http://maven.repository.redhat.com/techpreview/all</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
     </profiles>
 </project>

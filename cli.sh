@@ -44,9 +44,9 @@ function start_writer {
 
 case "$1" in
     build)
-        mvn clean install
-        mvn assembly:single
-        mvn assembly:single -P writer
+        mvn clean install -P no-settings
+        mvn assembly:single -P no-settings
+        mvn assembly:single -P writer,no-settings
         ;;
 
     start)
