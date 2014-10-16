@@ -18,6 +18,8 @@ NUM_OF_READERS=1
 
 CLUSTER_MODE=DIST_SYNC
 
+USE_ASYNC_API=false;
+
 mkdir -p pids
 
 function start_server_logs {
@@ -53,6 +55,9 @@ function start_readers {
 }
 
 function start_writer {
+    if [[ "$5" != "" ]]; then
+        USE_ASYNC_API=$5
+    fi
     if [[ "$4" != "" ]]; then
         OBJECT_SIZE=$4
     fi
@@ -65,8 +70,8 @@ function start_writer {
     if [[ "$1" != "" ]]; then
         CLUSTER_MODE=$1
     fi
-    echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE}"
-    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE}  | tee logs/writer.log
+    echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE} USE_ASYNC_API=${USE_ASYNC_API}"
+    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} ${USE_ASYNC_API} > logs/writer.log 2>&1 &
     echo "$!" > pids/writer.pid
 }
 
