@@ -186,6 +186,18 @@ function testReplAsync16ReaderNodesBulkAPI {
     create_reports "repl_async_16nodes_bulkapi"
 }
 
+function testReplSync16ReaderNodesBulkAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
+    start_writer REPL_SYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true 100
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_async_16nodes_bulkapi"
+}
+
 
 case "$1" in
     build)
@@ -252,8 +264,23 @@ case "$1" in
     run-test)
         shift
         case "$1" in
+            repl-sync-sync)
+                testReplSync16ReaderNodesSyncAPI
+                ;;
+            repl-async-sync)
+                testReplAsync16ReaderNodesSyncAPI
+                ;;
+            repl-sync-async)
+                testReplSync16ReaderNodesAsyncAPI
+                ;;
+            repl-async-async)
+                testReplAsync16ReaderNodesAsyncAPI
+                ;;
             repl-async-bulk)
                 testReplAsync16ReaderNodesBulkAPI
+                ;;
+            repl-sync-bulk)
+                testReplSync16ReaderNodesBulkAPI
                 ;;
             *)
                 echo "usage: cli.sh run-test (repl-async-bulk)"
