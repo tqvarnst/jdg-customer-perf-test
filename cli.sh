@@ -4,17 +4,17 @@
 pushd $(dirname $0) > /dev/null
 
 #JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dlog4j.configuration=log4j.xml"
-JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms512m -Xmx512m -Dlog4j.configuration=log4j.xml -Dlog4j.debug=true"
+JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -Dlog4j.configuration=log4j.xml -Dlog4j.debug=true"
 READ_CLIENT_JAR=target/reader-jar-with-dependencies.jar
 WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar
 
 #DEFAULT VALUES
 WAIT_TIME=60000
-OBJECT_COUNT=10000
+OBJECT_COUNT=100000
 OBJECT_SIZE=600
 READ_ENTRIES=false
 
-NUM_OF_READERS=16
+NUM_OF_READERS=10
 
 CLUSTER_MODE=REPL_ASYNC
 
@@ -122,6 +122,7 @@ function executeTests {
     testReplSync16ReaderNodesAsyncAPI
     testReplSync16ReaderNodesSyncAPI
     testReplAsync16ReaderNodesBulkAPI
+    testReplSync16ReaderNodesBulkAPI
 }
 
 
@@ -135,7 +136,7 @@ function testReplAsync16ReaderNodesSyncAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_async_16nodes_syncapi"
+    create_reports "repl_async_syncapi"
 }
 
 function testReplAsync16ReaderNodesAsyncAPI {
@@ -147,7 +148,7 @@ function testReplAsync16ReaderNodesAsyncAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_async_16nodes_asyncapi"
+    create_reports "repl_async_asyncapi"
 }
 
 function testReplSync16ReaderNodesSyncAPI {
@@ -159,7 +160,7 @@ function testReplSync16ReaderNodesSyncAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_sync_16nodes_syncapi"
+    create_reports "repl_sync_syncapi"
 }
 
 function testReplSync16ReaderNodesAsyncAPI {
@@ -171,7 +172,7 @@ function testReplSync16ReaderNodesAsyncAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_sync_16nodes_asyncapi"
+    create_reports "repl_sync_asyncapi"
 }
 
 function testReplAsync16ReaderNodesBulkAPI {
@@ -183,7 +184,7 @@ function testReplAsync16ReaderNodesBulkAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_async_16nodes_bulkapi"
+    create_reports "repl_async_bulkapi"
 }
 
 function testReplSync16ReaderNodesBulkAPI {
@@ -195,7 +196,7 @@ function testReplSync16ReaderNodesBulkAPI {
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
     stop_all_pids
-    create_reports "repl_async_16nodes_bulkapi"
+    create_reports "repl_sync_bulkapi"
 }
 
 
