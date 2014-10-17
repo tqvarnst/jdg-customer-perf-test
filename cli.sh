@@ -12,9 +12,9 @@ WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar
 WAIT_TIME=60000
 OBJECT_COUNT=100000
 OBJECT_SIZE=600
-READ_ENTRIES=false
-
+READ_ENTRIES=true
 NUM_OF_READERS=10
+BATCH_SIZE=1000
 
 CLUSTER_MODE=REPL_ASYNC
 
@@ -130,7 +130,7 @@ function executeTests {
 function testReplAsync16ReaderNodesSyncAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
+    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
     start_writer REPL_ASYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} false
     sleep 10 # Wait for servers to start
     start_server_logs
@@ -142,7 +142,7 @@ function testReplAsync16ReaderNodesSyncAPI {
 function testReplAsync16ReaderNodesAsyncAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
+    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
     start_writer REPL_ASYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true
     sleep 10 # Wait for servers to start
     start_server_logs
@@ -154,7 +154,7 @@ function testReplAsync16ReaderNodesAsyncAPI {
 function testReplSync16ReaderNodesSyncAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
+    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
     start_writer REPL_SYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} false
     sleep 10 # Wait for servers to start
     start_server_logs
@@ -166,7 +166,7 @@ function testReplSync16ReaderNodesSyncAPI {
 function testReplSync16ReaderNodesAsyncAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
+    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
     start_writer REPL_SYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true
     sleep 10 # Wait for servers to start
     start_server_logs
@@ -178,8 +178,8 @@ function testReplSync16ReaderNodesAsyncAPI {
 function testReplAsync16ReaderNodesBulkAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
-    start_writer REPL_ASYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true 100
+    start_readers REPL_ASYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
+    start_writer REPL_ASYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true ${BATCH_SIZE}
     sleep 10 # Wait for servers to start
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
@@ -190,8 +190,8 @@ function testReplAsync16ReaderNodesBulkAPI {
 function testReplSync16ReaderNodesBulkAPI {
     stop_all_pids
     rm -rf logs/*
-    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} true
-    start_writer REPL_SYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true 100
+    start_readers REPL_SYNC ${NUM_OF_READERS} ${WAIT_TIME} ${OBJECT_COUNT} ${READ_ENTRIES}
+    start_writer REPL_SYNC ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} true ${BATCH_SIZE}
     sleep 10 # Wait for servers to start
     start_server_logs
     sleep ${TEST_EXECUTION_TIME}
