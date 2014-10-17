@@ -30,6 +30,7 @@
 
 		<clustering mode="repl" >
 			<async />
+            <!-- <stateTransfer chunkSize="600"/> -->
 		</clustering>
 	</default>
 	<namedCache name="mytestcache"></namedCache>

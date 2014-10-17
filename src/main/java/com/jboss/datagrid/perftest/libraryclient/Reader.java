@@ -1,11 +1,11 @@
 package com.jboss.datagrid.perftest.libraryclient;
 
+import org.apache.log4j.Logger;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 
 import static com.jboss.datagrid.perftest.libraryclient.Constants.ClusterMode;
 
-import java.util.logging.Logger;
 
 public class Reader {
 

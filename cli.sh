@@ -3,8 +3,8 @@
 #Make sure we are in the root dir
 pushd $(dirname $0) > /dev/null
 
-JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dlog4j.configuration=log4j.xml"
-#JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g"
+#JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms1g -Xmx1g -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dlog4j.configuration=log4j.xml"
+JAVA_OPS="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Xms512m -Xmx512m -Dlog4j.configuration=log4j.xml -Dlog4j.debug=true"
 READ_CLIENT_JAR=target/reader-jar-with-dependencies.jar
 WRITE_CLIENT_JAR=target/writer-jar-with-dependencies.jar
 
@@ -14,11 +14,14 @@ OBJECT_COUNT=100000
 OBJECT_SIZE=600
 READ_ENTRIES=false
 
-NUM_OF_READERS=1
+NUM_OF_READERS=16
 
-CLUSTER_MODE=DIST_SYNC
+CLUSTER_MODE=REPL_ASYNC
 
-USE_ASYNC_API=false;
+USE_ASYNC_API=
+USE_BULK=
+
+TEST_EXECUTION_TIME=300  #Tests are run for 300sek or 5 min
 
 mkdir -p pids
 
@@ -55,7 +58,10 @@ function start_readers {
 }
 
 function start_writer {
-    if [[ "$5" != "" ]]; then
+    if [[ "$6" != "" ]]; then
+        USE_BULK=$5
+        BULK_SIZE=$6
+    elif [[ "$5" != "" ]]; then
         USE_ASYNC_API=$5
     fi
     if [[ "$4" != "" ]]; then
@@ -70,10 +76,116 @@ function start_writer {
     if [[ "$1" != "" ]]; then
         CLUSTER_MODE=$1
     fi
-    echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE} USE_ASYNC_API=${USE_ASYNC_API}"
-    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} ${USE_ASYNC_API} > logs/writer.log 2>&1 &
+    echo "Starting Writer with parameter CLUSTER_MODE=${CLUSTER_MODE} WAIT_TIME=${WAIT_TIME} OBJECT_COUNT=${OBJECT_COUNT} OBJECT_SIZE=${OBJECT_SIZE} USE_ASYNC_API=${USE_ASYNC_API} USE_BULK=${USE_BULK} BULK_SIZE=${BULK_SIZE}"
+    java ${JAVA_OPS} -DINSTANCE_NAME=byte-writer -jar ${WRITE_CLIENT_JAR} ${CLUSTER_MODE} ${WAIT_TIME} ${OBJECT_COUNT} ${OBJECT_SIZE} ${USE_ASYNC_API} ${USE_BULK} ${BULK_SIZE}> logs/writer.log 2>&1 &
     echo "$!" > pids/writer.pid
 }
+
+function stop_all_pids {
+
+    for pidfile in $(ls pids/*.pid 2>/dev/null)
+    do
+        while (( "$(ps -p $(cat ${pidfile}) | grep -v PID | wc -l)" > 0 ))
+        do
+            echo "Killing process width pid $(cat $pidfile)"
+            kill $(cat $pidfile)
+            sleep 1
+        done
+        rm -f $pidfile
+    done
+
+}
+
+function create_reports {
+    testcase=$1
+    mkdir -p results
+    cat logs/server.log | grep all | awk '{ print $1,$4,$12 }' | tr " " ","  > results/cpu_load_${testcase}.csv
+    cat logs/writer.log | grep "com.jboss.datagrid.perftest.libraryclient.Writer" > results/write_perf_report_${testcase}.log
+
+
+    reader_log_file=results/read_perf_report_${testcase}.log
+
+    echo "###### READ PERFORMANCE REPORT #######" > $reader_log_file
+
+    for reader in $(ls logs/reader-*.log 2>/dev/null)
+    do
+        echo ">>>>>>>>>>>>>>> $reader_log_file <<<<<<<<<<<<<<<" >> $reader_log_file
+        cat $reader | grep "com.jboss.datagrid.perftest.libraryclient.Reader Reading" >> $reader_log_file
+        echo ">>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<" >> $reader_log_file
+    done
+
+}
+
+function executeTests {
+    testReplAsync16ReaderNodesAsyncAPI
+    testReplAsync16ReaderNodesSyncAPI
+    testReplSync16ReaderNodesAsyncAPI
+    testReplSync16ReaderNodesSyncAPI
+    testReplAsync16ReaderNodesBulkAPI
+}
+
+
+
+function testReplAsync16ReaderNodesSyncAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_ASYNC ${NUM_OF_READERS} 60000 100000 true
+    start_writer REPL_ASYNC 60000 100000 600 false
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_async_16nodes_syncapi"
+}
+
+function testReplAsync16ReaderNodesAsyncAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_ASYNC ${NUM_OF_READERS} 60000 100000 true
+    start_writer REPL_ASYNC 60000 100000 600 true
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_async_16nodes_asyncapi"
+}
+
+function testReplSync16ReaderNodesSyncAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_SYNC ${NUM_OF_READERS} 60000 100000 true
+    start_writer REPL_SYNC 60000 100000 600 false
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_sync_16nodes_syncapi"
+}
+
+function testReplSync16ReaderNodesAsyncAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_SYNC ${NUM_OF_READERS} 60000 100000 true
+    start_writer REPL_SYNC 60000 100000 600 true
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_sync_16nodes_asyncapi"
+}
+
+function testReplAsync16ReaderNodesBulkAPI {
+    stop_all_pids
+    rm -rf logs/*
+    start_readers REPL_ASYNC ${NUM_OF_READERS} 60000 100000 true
+    start_writer REPL_ASYNC 60000 100000 600 true 1000
+    sleep 10 # Wait for servers to start
+    start_server_logs
+    sleep ${TEST_EXECUTION_TIME}
+    stop_all_pids
+    create_reports "repl_async_16nodes_bulkapi"
+}
+
 
 case "$1" in
     build)
@@ -122,12 +234,7 @@ case "$1" in
         esac
         ;;
     stop-all)
-        for pidfile in $(ls pids/*.pid)
-        do
-            echo "Killing process width pid $(cat $pidfile)"
-            kill $(cat $pidfile)
-            rm $pidfile
-        done
+        stop_all_pids
         ;;
     export)
         shift
@@ -137,6 +244,10 @@ case "$1" in
             exit 1
         fi
         cat logs/server.log | grep all | awk '{ print $1,$4,$12 }' > $1
+        ;;
+    run-tests)
+        shift
+        executeTests
         ;;
      *)
         echo "usage: cli.sh (build|start|view|stop-all|export)"
